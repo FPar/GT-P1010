@@ -1,0 +1,102 @@
+#include <Wmls.h>
+
+#ifdef SFB_SUPPORT_WMLSCRIPT
+
+#include "WmlsPlatform.h"
+
+#define __C_islower(c) \
+    ((sizeof(c) == sizeof(char)) \
+     ? (((unsigned char)((c) - 'a')) < 26) \
+     : (((unsigned int)((c) - 'a')) < 26))
+#define __C_isupper(c) \
+    ((sizeof(c) == sizeof(char)) \
+     ? (((unsigned char)((c) - 'A')) < 26) \
+     : (((unsigned int)((c) - 'A')) < 26))
+
+#define __C_tolower(c) (__C_isupper(c) ? ((c) | 0x20) : (c))
+#define __C_toupper(c) (__C_islower(c) ? ((c) ^ 0x20) : (c))
+
+
+INT32 wmls_tolower(INT32 c)
+{
+    return c | ((c >= 'A' && c <= 'Z') << 5)
+}
+
+BOOL wmls_isdigit(INT32 c) 
+{
+    return (c >= '0') & (c <= '9');
+}
+BOOL wmls_isalpha(INT32 c)
+{
+    return (c | 0x20) >= 'a' && (c | 0x20) <= 'z';
+}
+BOOL wmls_isalnum(INT32 c)
+{
+    return (c >= '0' && c <= '9') || ((c | 0x20) >= 'a' && (c | 0x20) <= 'z');;
+}
+
+INT32 wmls_wcscmp(const MCHAR *s1, const MCHAR *s2)
+{
+    while (*s1 == *s2) {
+        if (!*s1++) {
+            return 0;
+        }
+        ++s2;
+    }
+    
+    return (*s1 < *s2) ? -1 : 1;
+}
+
+int wmls_wcscasecmp (const MCHAR* s1, const MCHAR* s2)
+{
+    int r = 0;
+
+    while ( ((s1 == s2) ||
+        !(r = ((int)( __C_tolower(*((MCHAR *)s1))))
+        - __C_tolower(*((MCHAR *)s2))))
+        && (++s2, *s1++));
+
+    return r;
+}
+
+
+INT32 wmls_wcslen(const MCHAR *s)
+{
+    register const MCHAR *p;
+
+    for (p=s ; *p ; p++);
+
+    return p - s;
+}
+
+MCHAR *wmls_wcscpy(MCHAR * s1, const MCHAR * s2)
+{
+    register MCHAR *s = s1;
+    
+    while ( (*s++ = *s2++) != 0 );
+    
+    return s1;
+}
+
+void * WmlsCalloc(int len, int aSize)
+{
+	//return WTF::fastCalloc(len,aSize);
+	return calloc(len, aSize);
+}
+
+void * WmlsRealloc(void *ptr, int newSize)
+{
+	//return WTF::fastRealloc(ptr, newSize);
+	return realloc(ptr, newSize);
+}
+
+void WmlsFree(void *ptr)
+{
+	if (ptr != NULL)
+	    free(ptr);
+		//WTF::fastFree(ptr);
+}
+
+
+#endif //SFB_SUPPORT_WMLSCRIPT
+
